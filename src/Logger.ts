@@ -5,6 +5,7 @@ export default class Logger {
   public type: TYPE;
 
   private esc = "";
+  private stack: [string, string][];
 
   private success(result: string) {
     console.log(`[34m[${this.timestamp()}][0m [32m(√)[0m ${result}`);
@@ -25,25 +26,43 @@ export default class Logger {
   constructor(type: TYPE, content: string) {
     this.type = type;
     this.content = content;
+    this.stack = [];
   }
 
   timestamp() {
     return new Intl.DateTimeFormat("kr", { dateStyle: "medium", timeStyle: "medium" }).format(new Date());
   }
 
+  next(key: string) {
+    this.stack.push([key, '']);
+    return this;
+  }
+
+  put(value: string) {
+    const lastElement = this.stack.pop();
+    if (lastElement) this.stack.push([lastElement[0], value]);
+
+    return this;
+  }
+
   out() {
+    let content = this.content;
+    this.stack.forEach(st => {
+      content += `\n${" ".repeat(26)}- ${st.join(": ")}`
+    });
+
     switch (this.type) {
       case "info":
-        this.info(this.content);
+        this.info(content);
         break;
       case "success":
-        this.success(this.content);
+        this.success(content);
         break;
       case "warn":
-        this.warn(this.content);
+        this.warn(content);
         break;
       case "error":
-        this.error(this.content);
+        this.error(content);
         break;
     }
   }
