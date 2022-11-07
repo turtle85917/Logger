@@ -39,8 +39,10 @@ export default class Logger {
   }
 
   put(value: string) {
-    const lastElement = this.stack.pop();
-    if (lastElement) this.stack.push([lastElement[0], value]);
+    if (this.stack.at(-1)!.length < 3) {
+      const lastElement = this.stack.pop();
+      if (lastElement) this.stack.push([lastElement[0], value]);
+    }
 
     return this;
   }
@@ -48,7 +50,7 @@ export default class Logger {
   out() {
     let content = this.content;
     this.stack.forEach(st => {
-      content += `\n${" ".repeat(26)}- ${st.join(": ")}`
+      content += `\n${" ".repeat(26)}- [1m${st[0]}[0m: ${st[1] ?? "?"}`
     });
 
     switch (this.type) {
